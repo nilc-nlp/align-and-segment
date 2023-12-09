@@ -17,7 +17,7 @@ const FileUpload: React.FC = () => {
       formData.append('file', file);
 
       try {
-        const response = await axios.post('http://localhost:8000/upload/', formData, {
+        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/upload/`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -32,7 +32,7 @@ const FileUpload: React.FC = () => {
   const checkStatus = async () => {
     if (taskId) {
       try {
-        const response = await axios.get(`http://localhost:8000/status/${taskId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/status/${taskId}`);
         setStatus(response.data.status);
       } catch (error) {
         console.error('Error fetching status:', error);
