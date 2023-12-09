@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - task_queue
+      - worker
+    networks:
+      - backend-network
+
+  task_queue:
+    image: "redis/redis-stack:latest"
+    ports:
+      - 127.0.0.1:6379:6379
+    networks:
+      - backend-network
+
+  worker:
+    build: .
+    command: celery -A src.main.celery worker --loglevel=info
+    depends_on:
+      - task_queue
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
