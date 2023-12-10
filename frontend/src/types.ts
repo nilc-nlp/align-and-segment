@@ -1,6 +1,13 @@
 export enum StatusType {
+    NOT_STARTED = 'NOT_STARTED',
     PENDING = 'PENDING',
     PROCESSING = 'PROCESSING',
     SUCCESS = 'SUCCESS',
     FAILURE = 'FAILURE'
+}
+
+export enum FileType {
+    AUDIO = 'AUDIO',
+    TRANSCRIPTION = 'TRANSCRIPTION',
+    DIARIZATION = 'DIARIZATION'
 }

@@ -12,6 +12,10 @@ const Status: React.FC<StatusProps> = ({ status }) => {
     let color;
 
     switch (status) {
+        case StatusType.NOT_STARTED:
+            icon = <></>;
+            color = ' border-gray-500';
+            break;
         case StatusType.PENDING:
             icon = <MdHourglassFull />;
             color = 'bg-gray-500 border-gray-500';
@@ -33,7 +37,7 @@ const Status: React.FC<StatusProps> = ({ status }) => {
     }
 
     return (
-        <div className={`status-icon w-6 h-6 flex justify-center items-center rounded-full p-1 border ${color} text-white`}>
+        <div className={`status-icon w-6 h-6 mx-5 flex justify-center items-center rounded-full p-1 border ${color} text-white`}>
             {icon}
         </div>
     );
