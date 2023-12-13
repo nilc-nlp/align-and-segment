@@ -1,6 +1,7 @@
 from typing import Literal
-from pydantic import BaseModel, SecretStr, RedisDsn, PostgresDsn
+from pydantic import BaseModel, SecretStr, RedisDsn
 from pydantic_settings import BaseSettings
+from pathlib import Path
 
 
 class RedisConfig(BaseModel):
@@ -37,6 +38,7 @@ class Config(BaseSettings):
     """
 
     redis: RedisConfig = RedisConfig()
+    data_path: Path = Path("/app/data")
 
     class Config:
         env_file = ".env"

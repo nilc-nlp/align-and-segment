@@ -3,24 +3,43 @@ import React from 'react';
 import FileRow from '@/components/FileRow';
 import { StatusType } from '@/types';
 import { Button } from '@mui/material';
-import { MdAdd } from 'react-icons/md';
+import {
+    MdAdd, MdLinearScale, MdFileDownload
+} from 'react-icons/md';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 type FilePair = {
-    audioFile: File | null;
+    audioFile?: File | null;
     transcriptionFile: File | null;
     taskId: string | null;
     status: StatusType;
+    taskResult?: any | null;
 };
 
 const FileRowList: React.FC = () => {
 
-    const [fileRows, setFileRows] = useState<FilePair[]>([{ audioFile: null, transcriptionFile: null, taskId: null, status: StatusType.NOT_STARTED }]);
+    const [fileRows, setFileRows] = useState<FilePair[]>(() => {
+        const savedFileRows = localStorage.getItem('fileRows');
+        return savedFileRows ? JSON.parse(savedFileRows) : [{ audioFile: null, transcriptionFile: null, taskId: null, status: StatusType.NOT_STARTED }];
+    });
     const [readyToSubmit, setReadyToSubmit] = useState<boolean>(false);
+    const [processing, setProcessing] = useState<boolean>(false);
+    const [submitted, setSubmitted] = useState<boolean>(false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
+
+        // Save fileRows to localStorage
+        localStorage.setItem('fileRows', JSON.stringify(fileRows));
+
         // Check if all file pairs have both audioFile and transcriptionFile
-        const allFilesPresent = fileRows.every(pair => pair.audioFile && pair.transcriptionFile);
+        const allFilesPresent = fileRows.every(pair => pair.audioFile && pair.transcriptionFile && pair.taskId === null);
+        const finishedProcessing = fileRows.every(pair => pair.status === StatusType.SUCCESS || pair.status === StatusType.FAILURE);
+        setProcessing(!finishedProcessing);
 
         setReadyToSubmit(allFilesPresent);
     }, [fileRows]);
@@ -47,8 +66,15 @@ const FileRowList: React.FC = () => {
         setFileRows(newFileRows);
     }
 
-    const handleSubmit = async () => {
+    const setTaskResult = (index: number, taskResult: any) => {
+        const newFileRows = [...fileRows];
+        newFileRows[index].taskResult = taskResult?.result;
+        setFileRows(newFileRows);
+    }
 
+    const handleSubmit = async () => {
+        setProcessing(true);
+        setSubmitted(true);
         fileRows.forEach(async (filePair, index) => {
             if (!filePair.audioFile || !filePair.transcriptionFile) {
                 alert(`Please select both an audio file and a transcription file for the row #${index + 1}.`);
@@ -67,7 +93,7 @@ const FileRowList: React.FC = () => {
         formData.append('transcription_file', filePair.transcriptionFile as File);
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/upload/`, formData, {
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/alignment`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -90,8 +116,16 @@ const FileRowList: React.FC = () => {
 
     const checkStatus = async (index: number, filePair: FilePair) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/status/${filePair.taskId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/alignment/${filePair.taskId}`);
             setStatus(index, response.data.status);
+            if (response.data.status === StatusType.SUCCESS) {
+                setTaskResult(index, {
+                    fileName: response.data.split('/').pop()
+                });
+            }
+            else if (response.data.status === StatusType.FAILURE) {
+                console.error('Error processing file:', response.data.message);
+            }
         } catch (error) {
             console.error('Error fetching status:', error);
         }
@@ -108,6 +142,30 @@ const FileRowList: React.FC = () => {
         newFileRows[index].transcriptionFile = file;
         setFileRows(newFileRows);
     }
+
+    const handleDownload = async () => {
+        const zip = new JSZip();
+
+        for (const filePair of fileRows) {
+            if (filePair.taskResult !== null) {
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/alignment/${filePair.taskId}/download`, { responseType: 'blob' });
+                    zip.file(filePair.taskResult.fileName, response.data);
+                } catch (error) {
+                    console.error('Error downloading file:', error);
+                }
+            }
+        }
+
+        // Generate ZIP file and trigger download
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+            saveAs(content, 'files.zip');
+        });
+    };
+
+    const handleGoToSegmentation = () => {
+        navigate('/segmentation');
+    };
 
     return (
         <div className='flex flex-col'>
@@ -147,14 +205,36 @@ const FileRowList: React.FC = () => {
                 </Button>
             </div>
             <div className='border-t border-gray-200 m-auto pt-5 w-5/6 mt-10 justify-center flex'>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={!readyToSubmit}
-                    onClick={handleSubmit}
-                >
-                    Submit
-                </Button>
+                {!submitted || processing ? (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={!readyToSubmit || (submitted && processing)}
+                        onClick={handleSubmit}
+                    >
+                        Submit
+                    </Button>
+                ) : (
+                    <>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleGoToSegmentation}
+                            style={{ marginRight: '10px' }}
+                        >
+                            <MdLinearScale style={{ marginRight: '5px' }} />
+                            Go to Segmentation
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={handleDownload}
+                        >
+                            <MdFileDownload style={{ marginRight: '5px' }} />
+                            Download
+                        </Button>
+                    </>
+                )}
             </div>
         </div>
     );

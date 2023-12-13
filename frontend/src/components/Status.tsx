@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdHourglassEmpty, MdHourglassFull, MdCheckCircle, MdClose } from 'react-icons/md';
+import { MdHourglassFull, MdFileUpload, MdClose } from 'react-icons/md';
 import { IoMdCheckmark } from 'react-icons/io';
 import { StatusType } from '@/types'; // Update with the correct path
 
@@ -13,7 +13,7 @@ const Status: React.FC<StatusProps> = ({ status }) => {
 
     switch (status) {
         case StatusType.NOT_STARTED:
-            icon = <></>;
+            icon = <MdFileUpload />;
             color = ' border-gray-500';
             break;
         case StatusType.PENDING:
