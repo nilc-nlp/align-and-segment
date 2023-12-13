@@ -4,12 +4,6 @@ import os
 
 from src.config import CONFIG
 from src.tasks.alignment import process_audio_file
-from src.services.validation import (
-    validate_audio,
-    validate_textgrid,
-    validate_transcription,
-)
-
 
 router = APIRouter()
 
@@ -23,13 +17,6 @@ async def upload_file(
 
     audio_file_location = UPLOAD_FOLDER / str(audio_file.filename)
     transcription_file_location = UPLOAD_FOLDER / str(transcription_file.filename)
-
-    # Validate the files
-    validate_audio(audio_file)
-    import librosa
-
-    librosa.load(audio_file.file.read(), sr=None)
-    librosa.save(audio_file_location.as_posix(), sr=16000, mono=True)
 
     # Save the files
     with open(audio_file_location, "wb") as f:
