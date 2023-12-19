@@ -4,7 +4,7 @@
     # bool concatenate_files - deve ser true se o usuário quiser que os documentos enviados por ele sejam concatenados
     # textgrids_list - lista de textgrids
     # locs_files list - lista de arquivos txt com as falas correspondentes aos locutores
-    # file_name_list - nome a ser utilizado no arquivo de saída e nome do próprio arquivo - tanto de locutores qto textgrid senao preciso alterar - consigo descobrir o nome do proprio arquivo provav.
+    # file_name - nome a ser utilizado no arquivo de saída e nome do próprio arquivo - tanto de locutores qto textgrid senao preciso alterar - consigo descobrir o nome do proprio arquivo provav.
     # path - caminho para encontrar o arquivo
 def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_name, path):
 
@@ -899,38 +899,36 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
 
     for i in range (0,segments_quantity):
         #Criando a classe com todas as funções que serão utilizadas
-        locs_path = path + file_name + str(i)
+        
+        #locs_path = os.path.abspath(locs_files_list[i]) # 
+        locs_path = path + file_name + str(i) + "_locutores.txt"
         Segmentation = AutomaticSegmentation(path, locs_path) # esse locs files list acho que nao precisa manter
-        a = os.path.basename(locs_files_list[i]) # ARRUMAR
-
 
         # Pré-processando text grid de entrada
-        Segmentation.remove_overlaps(file_name) # AQUI PRECISA SER O NOME DO TEXTGRID textgrids_list[i]
+        textgrid_path = os.path.abspath(textgrids_list[i])
+        Segmentation.remove_overlaps(textgrid_path) # AQUI PRECISA SER O NOME DO TEXTGRID textgrids_list[i]
 
+    tg_new_path = path + "/" + file_name + ".TextGrid" #rel_path_inq + inq + "_concatenated_v2.TextGrid"
     if (concatenate_files):
         # Juntando todos os textgrids de entrada
-        Segmentation.concatenate_textgrids(textgrids_list, concatenated_tg_file)
+        Segmentation.concatenate_textgrids(textgrids_list, tg_new_path)
 
         # Juntando todos os arquivos de locutores
-        Segmentation.concatenate_locs_file(locs_files_list, concatenated_locs_file)
+        Segmentation.concatenate_locs_file(locs_files_list, locs_path)
 
         segments_quantity = 1
-        inq = "" # NOME ESCOLHIDO - DECIDIR SE VAI SER LISTA OU VAR ISSO AQUI
+        inq = file_name # NOME ESCOLHIDO - DECIDIR SE VAI SER LISTA OU VAR ISSO AQUI
 
         # ARRUMAR O NOME DOS TEXTGRIDS, SE VAI FICAR POR NUMERO OU NÃO
     for i in range(0, segments_quantity):
-        inq = file_name + "_" + str(i) # nome a ser utilizado
-        concatenated_tg_file = path + "/" + file_name + ".TextGrid" #rel_path_inq + inq + "_concatenated_v2.TextGrid"
-        concatenated_locs_file = path + "/" + file_name + "_locutores" + ".txt" #rel_path_inq + inq + "_locutores_v2.txt"
-        concatenated_locs_words_file = path + "/" + file_name + "_locutores" + "_palavras" + ".txt" #rel_path_inq + inq + "_locutores_palavras_v2.txt"
-        output_tg_file = file_name + ".TextGrid" # rel_path_inq + inq + "_OUTPUT_v2.TextGrid"
+        if( not concatenate_files):
+            inq += str(i) # nome a ser utilizado
+        tg_new_path = path + "/" + inq + ".TextGrid"
+        locs_words_path =  path + inq + "_locutores" + "_palavras" + ".txt" #rel_path_inq + inq + "_locutores_palavras_v2.txt"
+        output_tg_file = inq + ".TextGrid" # rel_path_inq + inq + "_OUTPUT_v2.TextGrid"
         
-        concatenated_locs_file = textgrids_list[i]
-        concatenated_locs_words_file
-
-
         # Gera arquivo de palavras por locutor
-        Segmentation.generate_words_file(concatenated_locs_file, concatenated_locs_words_file)
+        Segmentation.generate_words_file(locs_path, locs_words_path)
 
         # Parâmetros
         window_size = 0.3
@@ -941,7 +939,7 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
         min_words_h2 = 10
 
         # Aplicando o método
-        silences, dsrs_1, dsrs_2 = Segmentation.find_boundaries(concatenated_locs_words_file, concatenated_tg_file, output_tg_file, window_size, delta1, delta2, silence_threshold, interval_size, min_words_h2)
+        silences, dsrs_1, dsrs_2 = Segmentation.find_boundaries(locs_words_path, tg_new_path, output_tg_file, window_size, delta1, delta2, silence_threshold, interval_size, min_words_h2)
         print(output_tg_file, "SUCCESS" )
 
     # 6 parâmetros: tamanho da janela: 0.3                      (em s, deve ser positivo e não deve ser grande, talvez no max 1s)
