@@ -5,8 +5,10 @@
     # textgrids_list - lista de textgrids
     # locs_files list - lista de arquivos txt com as falas correspondentes aos locutores
     # file_name - nome a ser utilizado no arquivo de saída e nome do próprio arquivo - tanto de locutores qto textgrid senao preciso alterar - consigo descobrir o nome do proprio arquivo provav.
-    # path - caminho para encontrar o arquivo
-def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_name, path):
+    
+# NAO VAI PRECISAR 
+        #path - caminho para encontrar o arquivo
+def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_name):
 
     # Importar bibliotecas
     import re
@@ -18,9 +20,9 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
     clean_vocab ='ABCDEFGHIJKLMNOPQRSTUVWXYZÇÃÀÁÂÊÉÍÓÔÕÚÛabcdefghijklmnopqrstuvwxyzçãàáâêéíóôõúû\-\'\n\ '
 
     class AutomaticSegmentation:
-        def __init__(self, path, locs_file):
-            self.path = path
-            self.locs_file = locs_file
+        def __init__(self): # , path, locs_file
+            #self.path = path
+            #self.locs_file = locs_file
             self.text_align = ""
             self.alignment_tg = ""
 
@@ -901,31 +903,32 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
         #Criando a classe com todas as funções que serão utilizadas
         
         #locs_path = os.path.abspath(locs_files_list[i]) # 
-        locs_path = path + file_name + str(i) + "_locutores.txt"
-        Segmentation = AutomaticSegmentation(path, locs_path) # esse locs files list acho que nao precisa manter
+        #locs_path = path + file_name + str(i) + "_locutores.txt"
+        Segmentation = AutomaticSegmentation() #path, locs_path) # esse locs files list acho que nao precisa manter
 
         # Pré-processando text grid de entrada
         textgrid_path = os.path.abspath(textgrids_list[i])
-        Segmentation.remove_overlaps(textgrid_path) # AQUI PRECISA SER O NOME DO TEXTGRID textgrids_list[i]
+        Segmentation.remove_overlaps(textgrid_path) # AQUI PRECISA SER O PATH DO TEXTGRID
 
-    tg_new_path = path + "/" + file_name + ".TextGrid" #rel_path_inq + inq + "_concatenated_v2.TextGrid"
+    tg_new_path = file_name + ".TextGrid" #rel_path_inq + inq + "_concatenated_v2.TextGrid"
+    inq = file_name
+
     if (concatenate_files):
         # Juntando todos os textgrids de entrada
-        Segmentation.concatenate_textgrids(textgrids_list, tg_new_path)
+        Segmentation.concatenate_textgrids(textgrids_list, tg_new_path) # tg_new_path é o caminho para salvar o textgrid concatenado
 
         # Juntando todos os arquivos de locutores
+        locs_path = file_name + "_locutores.txt"
         Segmentation.concatenate_locs_file(locs_files_list, locs_path)
 
         segments_quantity = 1
-        inq = file_name # NOME ESCOLHIDO - DECIDIR SE VAI SER LISTA OU VAR ISSO AQUI
-
-        # ARRUMAR O NOME DOS TEXTGRIDS, SE VAI FICAR POR NUMERO OU NÃO
+    
     for i in range(0, segments_quantity):
-        if( not concatenate_files):
-            inq += str(i) # nome a ser utilizado
-        tg_new_path = path + "/" + inq + ".TextGrid"
-        locs_words_path =  path + inq + "_locutores" + "_palavras" + ".txt" #rel_path_inq + inq + "_locutores_palavras_v2.txt"
-        output_tg_file = inq + ".TextGrid" # rel_path_inq + inq + "_OUTPUT_v2.TextGrid"
+        if (not concatenate_files):
+            inq += str(i) 
+        tg_new_path = inq + ".TextGrid" 
+        locs_words_path = inq + "_locutores" + "_palavras" + ".txt" 
+        output_tg_path = inq + "_SEGMENTADO.TextGrid" 
         
         # Gera arquivo de palavras por locutor
         Segmentation.generate_words_file(locs_path, locs_words_path)
@@ -939,8 +942,8 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
         min_words_h2 = 10
 
         # Aplicando o método
-        silences, dsrs_1, dsrs_2 = Segmentation.find_boundaries(locs_words_path, tg_new_path, output_tg_file, window_size, delta1, delta2, silence_threshold, interval_size, min_words_h2)
-        print(output_tg_file, "SUCCESS" )
+        silences, dsrs_1, dsrs_2 = Segmentation.find_boundaries(locs_words_path, tg_new_path, output_tg_path, window_size, delta1, delta2, silence_threshold, interval_size, min_words_h2)
+        print(output_tg_path, "SUCCESS" )
 
     # 6 parâmetros: tamanho da janela: 0.3                      (em s, deve ser positivo e não deve ser grande, talvez no max 1s)
     #               threshold da 1a heurística (porcentagem

@@ -10,14 +10,14 @@ const SegmentationPage: React.FC = () => {
                 <InfoCard
                     icon={MdAudiotrack}
                     title="Transcrição com locutores"
-                    shortDescription="The speakers file must: 1. have identical words as the plain text transcription file. 2. each utterance must be anteceded by the name of the speaker in the format <i>speaker;utterance\n</i>"
-                    markdownDescription='The speakers file must: 1. have identical words as the plain text transcription file. 2. each utterance must be anteceded by the name of the speaker in the format <i>speaker;utterance\n</i>'
+                    shortDescription="The speakers file must: 1. have identical words as the plain text transcription file. 2. each utterance must be anteceded by the name of the speaker in the format 'speaker;utterance\n'"
+                    markdownDescription='The speakers file must: 1. have identical words as the plain text transcription file. 2. each utterance must be anteceded by the name of the speaker in the format "speaker;utterance\n"'
                 />
                 <InfoCard
                     icon={MdTextFields}
                     title="Transcrição em TextGrid"
-                    shortDescription="The file must be: 1. the .TextGrid file generated with UFPAlign "
-                    markdownDescription='The file must be: 1. the .TextGrid file generated with UFPAlign 2. have identical words as the other file.'
+                    shortDescription="The file must be the .TextGrid file generated with UFPAlign "
+                    markdownDescription='The file must be the .TextGrid file generated with UFPAlign and have identical words as the other file.'
                 />
             </div>
             {/* Content for Segmentation page */}
