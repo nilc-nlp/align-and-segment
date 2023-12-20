@@ -10,14 +10,14 @@ const AlignmentPage: React.FC = () => {
                 <InfoCard
                     icon={MdAudiotrack}
                     title="Áudio"
-                    shortDescription="The audio files must be in .mp3 or .wav format. They can have a maximum of 10 minutes."
-                    markdownDescription='# Hi, *Pluto*!'
+                    shortDescription="The audio files must be in .wav format. They can have a maximum of 10 minutes."
+                    markdownDescription='The audio files must be in .wav format, sample rate 16kHz and mono. They can have a maximum of 10 minutes.'
                 />
                 <InfoCard
                     icon={MdTextFields}
                     title="Transcrição"
                     shortDescription="O arquivo de transcrição deve estar no formato .txt e conter a transcrição correspondente ao áudio."
-                    markdownDescription='# Hi, *Pluto*!'
+                    markdownDescription='The transcription file must contain the exact transcription in plain text, with words separated by single spaces, without punctuation marks. The format must be .txt'
                 />
             </div>
             {/* Content for home page */}
