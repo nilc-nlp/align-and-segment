@@ -141,16 +141,6 @@ def apply_segmentation(concatenate_files, textgrids_list, locs_files_list, file_
                                 if(element.find(';') != -1): # se houver um ; na palavra, então é um erro de locutor concatenado à primeira palavra da próxima frase
                                     phrase_elements[index] = element.split(";")[1] # este elemento é atualizado só com a palavra, sem o locutor
                                     l = " ".join(phrase_elements) # e a frase é reconstruída sem o locutor
-                            # padronizando locutores para doc1, doc2... e l1,l2,...
-                            loc = re.sub(r'inf(\d+)', r'l\1', loc)
-                            loc = re.sub(r'doc(\d+)', r'doc\1', loc)
-                            # necessário entender quem são inf., doc. inf.m, inf.f, doc.m, doc.f
-                            loc = re.sub(r'inff', r'l1', loc)
-                            loc = re.sub(r'infm', r'l2', loc)
-                            loc = re.sub(r'docf', r'doc1', loc)
-                            loc = re.sub(r'docm', r'doc2', loc)
-                            loc = re.sub('inf$', 'l1', loc)
-                            loc = re.sub('doc$', 'doc1', loc)
                             for loc_from_list in locs_list:
                                 if re.search(loc_from_list+"[\s.;,-].*", l,re.IGNORECASE):  #remove locutor duplicado no inicio do texto    
                                     l = l[len(loc_from_list)+1:]
